@@ -29,10 +29,17 @@ class _ChatRoomState extends State<ChatRoom> {
     }
   }
 
-  void getMessages() async {
-    final messages = await _firestore.collection('messages').get();
-    for (var msg in messages.docs) {
-      print(msg.data());
+//  void getMessages() async {
+//    final messages = await _firestore.collection('messages').get();
+//    for (var msg in messages.docs) {
+//      print(msg.data());
+//    }
+//  }
+  void msgStream() async {
+    await for (var snapshot in _firestore.collection('messages').snapshots()) {
+      for (var msg in snapshot.docs) {
+        print(msg.data());
+      }
     }
   }
 
