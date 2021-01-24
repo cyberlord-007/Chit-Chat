@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChatRoom extends StatefulWidget {
   static String id = 'chat_room';
@@ -10,8 +11,10 @@ class ChatRoom extends StatefulWidget {
 }
 
 class _ChatRoomState extends State<ChatRoom> {
+  final _firestore = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
   User loggedInUser;
+  String msgText;
 
   @override
   void initState() {
@@ -23,6 +26,13 @@ class _ChatRoomState extends State<ChatRoom> {
     final user = await _auth.currentUser;
     if (user != null) {
       loggedInUser = user;
+    }
+  }
+
+  void getMessages() async {
+    final messages = await _firestore.collection('messages').get();
+    for (var msg in messages.docs) {
+      print(msg.data());
     }
   }
 
@@ -58,7 +68,7 @@ class _ChatRoomState extends State<ChatRoom> {
                     child: TextField(
                       style: TextStyle(color: Colors.white),
                       onChanged: (value) {
-                        //Do something with the user input.
+                        msgText = value;
                       },
                       decoration: kMessageTextFieldDecoration,
                     ),
@@ -68,7 +78,12 @@ class _ChatRoomState extends State<ChatRoom> {
                       Icons.send,
                       color: Colors.blue,
                     ),
-                    onPressed: () {},
+                    onPressed: () {
+                      _firestore.collection('messages').add({
+                        'text': msgText,
+                        'sender': loggedInUser.email,
+                      });
+                    },
                   ),
                 ],
               ),
