@@ -33,94 +33,99 @@ class _ChatRoomState extends State<ChatRoom> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: null,
-        actions: <Widget>[
-          IconButton(
-              icon: Icon(
-                Icons.exit_to_app,
-              ),
-              onPressed: () {
-                _auth.signOut();
-                Navigator.pop(context);
-              }),
-        ],
-        title: Text('⚡️Chat'),
-        backgroundColor: Colors.blue,
-      ),
-      body: SafeArea(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            StreamBuilder<QuerySnapshot>(
-                stream: _firestore.collection('messages').snapshots(),
-                // ignore: missing_return
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
-                    return Center(
-                      child: CircularProgressIndicator(
-                        backgroundColor: Colors.blueAccent,
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).requestFocus(FocusNode());
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          leading: null,
+          actions: <Widget>[
+            IconButton(
+                icon: Icon(
+                  Icons.exit_to_app,
+                ),
+                onPressed: () {
+                  _auth.signOut();
+                  Navigator.pop(context);
+                }),
+          ],
+          title: Text('⚡️Chat'),
+          backgroundColor: Colors.blue,
+        ),
+        body: SafeArea(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              StreamBuilder<QuerySnapshot>(
+                  stream: _firestore.collection('messages').snapshots(),
+                  // ignore: missing_return
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return Center(
+                        child: CircularProgressIndicator(
+                          backgroundColor: Colors.blueAccent,
+                        ),
+                      );
+                    }
+                    final messages = snapshot.data.docs.reversed;
+                    List<Widget> msgWidgets = [];
+                    for (var msg in messages) {
+                      final msgText = msg.data()['text'];
+                      final msgSender = msg.data()['sender'];
+
+                      final currentUser = loggedInUser.email;
+
+                      final msgWidget = MessageBubble(
+                        text: msgText,
+                        sender: msgSender,
+                        isMe: currentUser == msgSender,
+                      );
+                      msgWidgets.add(msgWidget);
+                    }
+                    return Expanded(
+                      child: ListView(
+                        reverse: true,
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+                        children: msgWidgets,
                       ),
                     );
-                  }
-                  final messages = snapshot.data.docs.reversed;
-                  List<Widget> msgWidgets = [];
-                  for (var msg in messages) {
-                    final msgText = msg.data()['text'];
-                    final msgSender = msg.data()['sender'];
-
-                    final currentUser = loggedInUser.email;
-
-                    final msgWidget = MessageBubble(
-                      text: msgText,
-                      sender: msgSender,
-                      isMe: currentUser == msgSender,
-                    );
-                    msgWidgets.add(msgWidget);
-                  }
-                  return Expanded(
-                    child: ListView(
-                      reverse: true,
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-                      children: msgWidgets,
+                  }),
+              Container(
+                decoration: kMessageContainerDecoration,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Expanded(
+                      child: TextField(
+                        decoration: InputDecoration(border: InputBorder.none),
+                        controller: msgTextController,
+                        style: TextStyle(color: Colors.white),
+                        onChanged: (value) {
+                          msgText = value;
+                        },
+                      ),
                     ),
-                  );
-                }),
-            Container(
-              decoration: kMessageContainerDecoration,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Expanded(
-                    child: TextField(
-                      controller: msgTextController,
-                      style: TextStyle(color: Colors.white),
-                      onChanged: (value) {
-                        msgText = value;
+                    IconButton(
+                      icon: Icon(
+                        Icons.send,
+                        color: Colors.blue,
+                      ),
+                      onPressed: () {
+                        msgTextController.clear();
+                        _firestore.collection('messages').add({
+                          'text': msgText,
+                          'sender': loggedInUser.email,
+                        });
                       },
-                      decoration: kMessageTextFieldDecoration,
                     ),
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.send,
-                      color: Colors.blue,
-                    ),
-                    onPressed: () {
-                      msgTextController.clear();
-                      _firestore.collection('messages').add({
-                        'text': msgText,
-                        'sender': loggedInUser.email,
-                      });
-                    },
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
