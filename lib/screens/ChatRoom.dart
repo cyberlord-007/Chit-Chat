@@ -66,6 +66,33 @@ class _ChatRoomState extends State<ChatRoom> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
+            StreamBuilder<QuerySnapshot>(
+                stream: _firestore.collection('messages').snapshots(),
+                // ignore: missing_return
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return Center(
+                      child: CircularProgressIndicator(
+                        backgroundColor: Colors.blueAccent,
+                      ),
+                    );
+                  }
+                  final messages = snapshot.data.docs;
+                  List<Text> msgWidgets = [];
+                  for (var msg in messages) {
+                    final msgText = msg.data()['text'];
+                    final msgSender = msg.data()['sender'];
+
+                    final msgWidget = Text(
+                      '$msgText from $msgSender',
+                      style: TextStyle(color: Colors.white),
+                    );
+                    msgWidgets.add(msgWidget);
+                  }
+                  return Column(
+                    children: msgWidgets,
+                  );
+                }),
             Container(
               decoration: kMessageContainerDecoration,
               child: Row(
