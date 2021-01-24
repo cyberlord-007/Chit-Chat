@@ -31,14 +31,6 @@ class _ChatRoomState extends State<ChatRoom> {
     }
   }
 
-  void msgStream() async {
-    await for (var snapshot in _firestore.collection('messages').snapshots()) {
-      for (var msg in snapshot.docs) {
-        print(msg.data());
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,7 +65,7 @@ class _ChatRoomState extends State<ChatRoom> {
                       ),
                     );
                   }
-                  final messages = snapshot.data.docs;
+                  final messages = snapshot.data.docs.reversed;
                   List<Widget> msgWidgets = [];
                   for (var msg in messages) {
                     final msgText = msg.data()['text'];
@@ -90,6 +82,7 @@ class _ChatRoomState extends State<ChatRoom> {
                   }
                   return Expanded(
                     child: ListView(
+                      reverse: true,
                       padding:
                           EdgeInsets.symmetric(horizontal: 10, vertical: 20),
                       children: msgWidgets,
@@ -146,7 +139,8 @@ class MessageBubble extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.all(10),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment:
+            isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
           Text(
             sender,
