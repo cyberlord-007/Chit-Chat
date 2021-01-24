@@ -79,8 +79,13 @@ class _ChatRoomState extends State<ChatRoom> {
                     final msgText = msg.data()['text'];
                     final msgSender = msg.data()['sender'];
 
-                    final msgWidget =
-                        MessageBubble(text: msgText, sender: msgSender);
+                    final currentUser = loggedInUser.email;
+
+                    final msgWidget = MessageBubble(
+                      text: msgText,
+                      sender: msgSender,
+                      isMe: currentUser == msgSender,
+                    );
                     msgWidgets.add(msgWidget);
                   }
                   return Expanded(
@@ -130,10 +135,11 @@ class _ChatRoomState extends State<ChatRoom> {
 }
 
 class MessageBubble extends StatelessWidget {
-  MessageBubble({this.text, this.sender});
+  MessageBubble({this.text, this.sender, this.isMe});
 
   final String text;
   final String sender;
+  final isMe;
 
   @override
   Widget build(BuildContext context) {
@@ -147,17 +153,25 @@ class MessageBubble extends StatelessWidget {
             style: TextStyle(fontSize: 12.0, color: Colors.blueGrey),
           ),
           Material(
-            borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(30),
-                bottomLeft: Radius.circular(30),
-                bottomRight: Radius.circular(30)),
+            borderRadius: isMe
+                ? BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    bottomLeft: Radius.circular(30),
+                    bottomRight: Radius.circular(30))
+                : BorderRadius.only(
+                    topRight: Radius.circular(30),
+                    bottomLeft: Radius.circular(30),
+                    bottomRight: Radius.circular(30)),
             elevation: 5.0,
-            color: Colors.blue,
+            shadowColor: isMe ? Colors.white : Colors.blue,
+            color: isMe ? Colors.blue : Colors.white,
             child: Padding(
               padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
               child: Text(
                 '$text',
-                style: TextStyle(color: Colors.white, fontSize: 15.0),
+                style: TextStyle(
+                    color: isMe ? Colors.white : Colors.black87,
+                    fontSize: 15.0),
               ),
             ),
           ),
