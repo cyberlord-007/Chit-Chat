@@ -2,6 +2,7 @@ import 'package:chit_chat/screens/SignUp.dart';
 import 'package:flutter/material.dart';
 import './screens/LogIn.dart';
 import './screens/SignUp.dart';
+import './screens/ChatRoom.dart';
 
 void main() {
   runApp(MyApp());
@@ -22,7 +23,8 @@ class MyApp extends StatelessWidget {
       initialRoute: LogIn.id,
       routes: {
         LogIn.id: (context) => LogIn(),
-        SignUp.id: (context) => SignUp()
+        SignUp.id: (context) => SignUp(),
+        ChatRoom.id: (context) => ChatRoom()
       },
     );
   }

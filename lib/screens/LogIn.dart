@@ -25,12 +25,14 @@ class _LogInState extends State<LogIn> {
             children: [
               Spacer(),
               TextField(
+                keyboardType: TextInputType.emailAddress,
                 style: TextStyle(color: Colors.white),
                 decoration: textFieldInputDecoration(
                     'Enter your email...', 'Email', Icons.mail),
               ),
               SizedBox(height: 20),
               TextField(
+                obscureText: true,
                 style: TextStyle(color: Colors.white),
                 decoration: textFieldInputDecoration(
                     'Type your password...', 'Password', Icons.lock),

@@ -1,5 +1,7 @@
+import 'package:chit_chat/screens/ChatRoom.dart';
 import 'package:chit_chat/screens/LogIn.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../constants.dart';
 import '../widgets/widget.dart';
 
@@ -10,6 +12,11 @@ class SignUp extends StatefulWidget {
 }
 
 class _SignUpState extends State<SignUp> {
+  final _auth = FirebaseAuth.instance;
+  String username;
+  String email;
+  String password;
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -24,18 +31,29 @@ class _SignUpState extends State<SignUp> {
             children: [
               Spacer(),
               TextField(
+                onChanged: (value) {
+                  username = value;
+                },
                 style: TextStyle(color: Colors.white),
                 decoration: textFieldInputDecoration(
                     'Username...', 'Username', Icons.person),
               ),
               SizedBox(height: 20),
               TextField(
+                keyboardType: TextInputType.emailAddress,
+                onChanged: (value) {
+                  email = value;
+                },
                 style: TextStyle(color: Colors.white),
                 decoration:
                     textFieldInputDecoration('Email...', 'Email', Icons.mail),
               ),
               SizedBox(height: 20),
               TextField(
+                obscureText: true,
+                onChanged: (value) {
+                  password = value;
+                },
                 style: TextStyle(color: Colors.white),
                 decoration: textFieldInputDecoration(
                     'Create a Password...', 'Password', Icons.lock),
@@ -48,6 +66,18 @@ class _SignUpState extends State<SignUp> {
                   color: kPrimaryColor,
                   borderRadius: BorderRadius.circular(30.0),
                   child: MaterialButton(
+                    onPressed: () async {
+                      try {
+                        final newUser =
+                            await _auth.createUserWithEmailAndPassword(
+                                email: email, password: password);
+                        if (newUser != null) {
+                          Navigator.pushNamed(context, ChatRoom.id);
+                        }
+                      } catch (e) {
+                        print(e);
+                      }
+                    },
                     minWidth: 200.0,
                     height: 42.0,
                     child: Text(
