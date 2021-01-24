@@ -13,6 +13,8 @@ class ChatRoom extends StatefulWidget {
 class _ChatRoomState extends State<ChatRoom> {
   final _firestore = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
+  final msgTextController = TextEditingController();
+
   User loggedInUser;
   String msgText;
 
@@ -29,12 +31,6 @@ class _ChatRoomState extends State<ChatRoom> {
     }
   }
 
-//  void getMessages() async {
-//    final messages = await _firestore.collection('messages').get();
-//    for (var msg in messages.docs) {
-//      print(msg.data());
-//    }
-//  }
   void msgStream() async {
     await for (var snapshot in _firestore.collection('messages').snapshots()) {
       for (var msg in snapshot.docs) {
@@ -78,19 +74,21 @@ class _ChatRoomState extends State<ChatRoom> {
                     );
                   }
                   final messages = snapshot.data.docs;
-                  List<Text> msgWidgets = [];
+                  List<Widget> msgWidgets = [];
                   for (var msg in messages) {
                     final msgText = msg.data()['text'];
                     final msgSender = msg.data()['sender'];
 
-                    final msgWidget = Text(
-                      '$msgText from $msgSender',
-                      style: TextStyle(color: Colors.white),
-                    );
+                    final msgWidget =
+                        MessageBubble(text: msgText, sender: msgSender);
                     msgWidgets.add(msgWidget);
                   }
-                  return Column(
-                    children: msgWidgets,
+                  return Expanded(
+                    child: ListView(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+                      children: msgWidgets,
+                    ),
                   );
                 }),
             Container(
@@ -100,6 +98,7 @@ class _ChatRoomState extends State<ChatRoom> {
                 children: <Widget>[
                   Expanded(
                     child: TextField(
+                      controller: msgTextController,
                       style: TextStyle(color: Colors.white),
                       onChanged: (value) {
                         msgText = value;
@@ -113,6 +112,7 @@ class _ChatRoomState extends State<ChatRoom> {
                       color: Colors.blue,
                     ),
                     onPressed: () {
+                      msgTextController.clear();
                       _firestore.collection('messages').add({
                         'text': msgText,
                         'sender': loggedInUser.email,
@@ -124,6 +124,44 @@ class _ChatRoomState extends State<ChatRoom> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class MessageBubble extends StatelessWidget {
+  MessageBubble({this.text, this.sender});
+
+  final String text;
+  final String sender;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.all(10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            sender,
+            style: TextStyle(fontSize: 12.0, color: Colors.blueGrey),
+          ),
+          Material(
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(30),
+                bottomLeft: Radius.circular(30),
+                bottomRight: Radius.circular(30)),
+            elevation: 5.0,
+            color: Colors.blue,
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+              child: Text(
+                '$text',
+                style: TextStyle(color: Colors.white, fontSize: 15.0),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
