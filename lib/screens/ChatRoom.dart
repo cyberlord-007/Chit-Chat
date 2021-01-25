@@ -59,7 +59,10 @@ class _ChatRoomState extends State<ChatRoom> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               StreamBuilder<QuerySnapshot>(
-                  stream: _firestore.collection('messages').snapshots(),
+                  stream: _firestore
+                      .collection('messages')
+                      .orderBy('timestamp', descending: true)
+                      .snapshots(),
                   // ignore: missing_return
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
@@ -69,7 +72,7 @@ class _ChatRoomState extends State<ChatRoom> {
                         ),
                       );
                     }
-                    final messages = snapshot.data.docs.reversed;
+                    final messages = snapshot.data.docs;
                     List<Widget> msgWidgets = [];
                     for (var msg in messages) {
                       final msgText = msg.data()['text'];
@@ -118,6 +121,8 @@ class _ChatRoomState extends State<ChatRoom> {
                         _firestore.collection('messages').add({
                           'text': msgText,
                           'sender': loggedInUser.email,
+                          'timestamp':
+                              DateTime.now().toUtc().millisecondsSinceEpoch,
                         });
                       },
                     ),

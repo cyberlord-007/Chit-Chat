@@ -5,7 +5,6 @@ import './screens/SignUp.dart';
 import './screens/ChatRoom.dart';
 import 'package:firebase_core/firebase_core.dart';
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
