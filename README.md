@@ -1,4 +1,4 @@
-# chit_chat
+# Chit Chat
 
 Fllutter chat application
 
